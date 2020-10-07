@@ -1,0 +1,4 @@
+---
+- name: Reboot server
+  win_reboot:
+    reboot_timeout: 3600

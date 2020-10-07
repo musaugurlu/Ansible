@@ -1,0 +1,6 @@
+---
+# Create the Servers
+- import_playbook: create_servers.yml
+
+# Configure the Services
+- import_playbook: configure_services.yml

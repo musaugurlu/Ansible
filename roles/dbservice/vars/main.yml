@@ -1,0 +1,5 @@
+---
+mysqlserver_name: vm-demo-db
+mysqldb_name: luckylibrary
+admin_username: luckylibrary
+admin_password: "{{ password }}"

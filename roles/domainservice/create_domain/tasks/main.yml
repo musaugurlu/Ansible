@@ -1,0 +1,34 @@
+---
+- name: Create AD Forest and Domain
+  win_domain:
+    dns_domain_name: "{{ domain_name }}"
+    domain_mode: "{{ domain_level }}"
+    domain_netbios_name: "{{ domain_netbios_name }}"
+    forest_mode: "{{ domain_level }}"
+    safe_mode_password: "{{ ansible_password }}"
+  register: forest_created
+  when: "'dc-servers' is in group_names"
+
+- name: Reboot server
+  win_reboot:
+    reboot_timeout: 3600
+  when: forest_created is changed
+
+- name: Promote Server to Domain Controller
+  win_domain_controller:
+    dns_domain_name: "{{ domain_name }}"
+    domain_admin_user: "{{ ansible_user }}@{{ domain_name }}"
+    domain_admin_password: "{{ ansible_password }}"
+    safe_mode_password: "{{ ansible_password }}"
+    state: domain_controller
+  register: server_promoted
+  when: "'dc-servers' is in group_names"
+
+- name: Reboot server
+  win_reboot:
+    reboot_timeout: 3600
+  when: server_promoted is changed
+
+- name: Set timezone to EST
+  win_timezone:
+    timezone: Eastern Standard Time

@@ -1,0 +1,55 @@
+---
+- name: Create MySQL Server
+  azure_rm_mysqlserver:
+    resource_group: "{{ resource_group }}"
+    name: "{{ mysqlserver_name }}"
+    sku:
+      name: B_Gen5_1
+      tier: Basic
+    location: "{{ resource_location }}"
+    version: "5.6"
+    enforce_ssl: True
+    admin_username: "{{ admin_username }}"
+    admin_password: "{{ admin_password }}"
+    storage_mb: 51200
+
+- name: Create instance of MySQL Database
+  azure_rm_mysqldatabase:
+    resource_group: "{{ resource_group }}"
+    server_name: "{{ mysqlserver_name }}"
+    name: "{{ mysqldb_name }}"
+
+- name: Open firewall to access MySQL Server from outside
+  azure_rm_resource:
+    api_version: '2017-12-01'
+    resource_group: "{{ resource_group }}"
+    provider: dbformysql
+    resource_type: servers
+    resource_name: "{{ mysqlserver_name }}"
+    subresource:
+      - type: firewallrules
+        name: externalaccess
+    body:
+      properties:
+        startIpAddress: "0.0.0.0"
+        endIpAddress: "255.255.255.255"
+
+- name: Query MySQL Servers in current resource group
+  azure_rm_mysqlserver_info:
+    resource_group: "{{ resource_group }}"
+  register: mysqlserverfacts
+
+- name: Query MySQL Databases
+  azure_rm_mysqldatabase_info:
+    resource_group: "{{ resource_group }}"
+    server_name: "{{ mysqlserver_name }}"
+  register: mysqldatabasefacts
+
+- name: Create an in-memory group db-servers and add db server and database info to this group 
+  add_host:
+    name: "db-server"
+    groups: "db-servers"
+    dbhostname: "{{ mysqlserverfacts['servers'][0]['fully_qualified_domain_name'] }}"
+    dbusername: "{{ mysqlserverfacts['servers'][0]['admin_username'] }}"
+    dbservername: "{{ mysqlserver_name }}"
+    dbname: "{{ mysqldb_name }}"

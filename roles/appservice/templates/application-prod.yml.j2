@@ -1,0 +1,16 @@
+server:
+  port: {{ backend_port }}
+spring:
+  application:
+    name: LuckyLibrary
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: "jdbc:mysql://{{ hostvars[groups['db-servers'][0]]['dbhostname'] }}:3306/{{ hostvars[groups['db-servers'][0]]['dbname'] }}?useSSL=true&requireSSL=false&serverTimezone=UTC"
+    username: "{{ hostvars[groups['db-servers'][0]]['dbusername'] }}@{{ hostvars[groups['db-servers'][0]]['dbservername'] }}"
+    password: "{{ ansible_password }}"
+jwt:
+  secret: 'Ch@ngeTh!5ToS3cur3Str!ng'
+  expirationMs: 3600000

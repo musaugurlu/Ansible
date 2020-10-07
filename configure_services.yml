@@ -1,0 +1,12 @@
+---
+- hosts: dc-servers
+  roles:
+    - role: 'roles/domainservice/create_domain'
+
+- hosts: app-servers
+  roles:
+    - role: 'roles/domainservice/add_computer'
+      
+- hosts: app-servers
+  roles:
+    - role: 'roles/appservice'

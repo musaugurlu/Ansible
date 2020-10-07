@@ -1,0 +1,25 @@
+---
+- name: Set DNS Client Address to DC server
+  win_dns_client:
+    adapter_names: Ethernet
+    ipv4_addresses: "{{ hostvars[groups['dc-servers'][0]]['ansible_ip_addresses'][0] }}"
+  register: dnsaddress_set
+
+- name: Pause for 5 Seconds
+  pause:
+    seconds: 5
+  when: dnsaddress_set is changed
+
+# - name: Reboot server
+#   win_reboot:
+#     reboot_timeout: 3600
+#   when: dnsaddress_set is changed
+
+- name: Add Server to Domain
+  win_domain_membership:
+    dns_domain_name: "{{ domain_name }}"
+    domain_admin_user: "{{ ansible_user }}@{{ domain_name }}"
+    domain_admin_password: "{{ ansible_password }}"
+    state: domain
+  notify:
+    - Reboot server

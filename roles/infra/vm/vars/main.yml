@@ -1,0 +1,12 @@
+---
+local_admin_username: demo_ladmin
+vm_hosts_group: new_server
+vm_size: Standard_DS1_v2
+vm_name: vm-demo
+vm_os_type: Windows
+vm_os_sku: 2019-Datacenter
+vm_image:
+  offer: WindowsServer
+  publisher: MicrosoftWindowsServer
+  sku: "{{ vm_os_sku }}"
+  version: latest

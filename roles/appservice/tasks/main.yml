@@ -1,0 +1,93 @@
+---
+- name: Install Git
+  win_chocolatey:
+    name: git
+    state: present
+
+- name: Install Java
+  win_chocolatey:
+    name: openjdk11
+    version: 11.0.8.10
+    state: present
+
+- name: Install VS Code
+  win_chocolatey:
+    name: vscode
+    state: present
+  when: is_prod is not true
+
+- name: Install Chrome
+  win_chocolatey:
+    name: googlechrome
+    state: present
+  when: is_prod is not true 
+
+- name: Set JAVA_HOME for all users
+  win_environment:
+    state: present
+    name: JAVA_HOME
+    value: C:\Program Files\OpenJDK\openjdk-11.0.8_10
+    level: machine
+
+- name: Install NGINX
+  win_chocolatey:
+    name: nginx
+    version: 1.19.2
+    state: present
+
+- name: Copy Files
+  win_copy:
+    src: "{{ role_path }}/files/"
+    dest: "C:\\Temp"
+
+- name: Install Tomcat
+  win_shell: |
+    C:\Temp\Install-Tomcat.ps1
+
+- name: Pull git image
+  win_shell: |
+    C:\Temp\Copy-GitFolder.ps1 -Path "D:" -Uri "https://github.com/musaugurlu/LuckyLibrary.git"
+
+- name: Copy Properties file to backend
+  win_template:
+    src: "{{ role_path }}/templates/application-prod.yml.j2"
+    dest: "D:\\LuckyLibrary\\backend\\src\\main\\resources\\application.yml"
+
+- name: Setup frontend route
+  win_shell: |
+    $HelperFilePath = Get-ChildItem "D:\LuckyLibrary\frontend\dist\js\app.*.js" | Select-Object -ExpandProperty FullName
+    $FEPort = Get-Content $HelperFilePath
+    $FEPort.Replace("http://localhost:8090", "http://{{ ansible_hostname }}/api") | Set-Content -Path $HelperFilePath
+
+- name: Built backend Application
+  win_shell: |
+    cd "D:\LuckyLibrary\backend"
+    .\mvnw.cmd package -DskipTests
+
+- name: Deploy backend Application
+  win_shell: |
+    $Folder = Get-ChildItem -Path "D:\Apache*\Webapps" | Select-Object -ExpandProperty FullName
+    Get-ChildItem $Folder | Remove-Item -Recursive -Force -Confirm:$False
+    Copy-Item D:\LuckyLibrary\backend\target\LuckyLibrary.war -Destination "$Folder\ROOT.war"
+
+- name: Start Tomcat
+  win_service:
+    name: tomcat9
+    start_mode: auto
+    state: restarted
+
+- name: Set up NGINX for frontend
+  win_template:
+    src: "{{ role_path }}/templates/nginx.conf.j2"
+    dest: "C:\\tools\\nginx-1.19.2\\conf\\nginx.conf"
+
+- name:
+  win_service:
+    name: nginx
+    state: restarted
+
+- name: Open 80 and 443 in local Firewall
+  win_shell: |
+    New-NetFirewallRule -DisplayName "Allow inbound TCP port 443" -Direction inbound -LocalPort 443 -Protocol TCP -Action Allow
+    New-NetFirewallRule -DisplayName "Allow inbound TCP port 80" -Direction inbound -LocalPort 80 -Protocol TCP -Action Allow
+
