@@ -4,5 +4,6 @@ vm_net_address_prefix: "10.0.0.0/16"
 vm_net_subnet_name: snet-demo
 vm_net_subnet_address_prefix: "10.0.1.0/24"
 vm_net_public_ip_name: "pip-{{vm_name}}"
+vm_net_public_ip_dns_label: ''
 vm_net_security_group_name: nsg-demo
 vm_net_interface_name: "nic-{{vm_name}}"

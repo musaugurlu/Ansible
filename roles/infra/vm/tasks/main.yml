@@ -32,6 +32,7 @@
   add_host:
     name: "{{ output_ip_address.state.ip_address }}"
     groups: "{{ vm_hosts_group }}"
+    fqdn_label : "{{ vm_net_public_ip_dns_label }}.{{ resource_location }}.cloudapp.azure.com"
     ansible_user: "{{ local_admin_username }}"
     ansible_password: "{{ password }}"
     ansible_port: 5986

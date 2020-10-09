@@ -36,10 +36,11 @@ http {
         listen 80;
         listen [::]:80;
         server_name _ default_server;
+        root   D:\LuckyLibrary\frontend\dist;
+        index  index.html index.htm;
 
         location / {
-            root   D:\LuckyLibrary\frontend\dist;
-            index  index.html index.htm;
+            try_files $uri $uri/ /index.html;
         }
         
         location /api/ {

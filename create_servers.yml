@@ -12,10 +12,12 @@
         vm_name: vm-demo-dc
         vm_hosts_group: dc-servers
         vm_os_sku: 2019-Datacenter-core
+        vm_net_pip_dns_label: ''
       app:
         vm_name: vm-demo-app
         vm_hosts_group: app-servers
         vm_os_sku: 2019-Datacenter
+        vm_net_pip_dns_label: luckylibrary
 
   tasks:
     - name: "Create Servers"
@@ -23,6 +25,7 @@
         vm_name: "{{ item.value.vm_name }}"
         vm_hosts_group: "{{ item.value.vm_hosts_group }}"
         vm_os_sku: "{{ item.value.vm_os_sku }}"
+        vm_net_public_ip_dns_label: "{{ item.value.vm_net_pip_dns_label }}"
       include_role:
         name: roles/infra/vm
       with_dict: "{{ servers }}"

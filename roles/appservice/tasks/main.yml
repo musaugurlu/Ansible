@@ -57,7 +57,7 @@
   win_shell: |
     $HelperFilePath = Get-ChildItem "D:\LuckyLibrary\frontend\dist\js\app.*.js" | Select-Object -ExpandProperty FullName
     $FEPort = Get-Content $HelperFilePath
-    $FEPort.Replace("http://localhost:8090", "http://{{ ansible_hostname }}/api") | Set-Content -Path $HelperFilePath
+    $FEPort.Replace("http://localhost:8090", "http://{{ hostvars[inventory_hostname]['fqdn_label'] }}/api") | Set-Content -Path $HelperFilePath
 
 - name: Built backend Application
   win_shell: |
@@ -67,7 +67,7 @@
 - name: Deploy backend Application
   win_shell: |
     $Folder = Get-ChildItem -Path "D:\Apache*\Webapps" | Select-Object -ExpandProperty FullName
-    Get-ChildItem $Folder | Remove-Item -Recursive -Force -Confirm:$False
+    Get-ChildItem -Path $Folder | Remove-Item -Recurse -Force -Confirm:$false
     Copy-Item D:\LuckyLibrary\backend\target\LuckyLibrary.war -Destination "$Folder\ROOT.war"
 
 - name: Start Tomcat
