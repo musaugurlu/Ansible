@@ -42,7 +42,7 @@
 
 - name: Install Tomcat
   win_shell: |
-    C:\Temp\Install-Tomcat.ps1
+    C:\Temp\Install-Tomcat.ps1 -ServicePort "{{ backend_port }}"
 
 - name: Pull git image
   win_shell: |
